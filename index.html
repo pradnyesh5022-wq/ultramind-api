@@ -364,34 +364,6 @@
             animation: slideUp 0.4s ease;
         }
         
-        .result-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 16px;
-        }
-        
-        .result-actions {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .icon-btn {
-            padding: 8px 12px;
-            background: var(--bg-light);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: var(--transition);
-            font-size: 12px;
-        }
-        
-        .icon-btn:hover {
-            background: white;
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-        
         .result-content {
             padding: 20px;
             background: var(--bg-light);
@@ -580,13 +552,7 @@
                 </div>
                 
                 <div class="result-container" id="resultContainer">
-                    <div class="result-header">
-                        <h4 style="font-size: 14px; font-weight: 700; color: var(--text-dark);">📋 AI Analysis Results</h4>
-                        <div class="result-actions">
-                            <button class="icon-btn" id="copyBtn" title="Copy to clipboard">📋 Copy</button>
-                            <button class="icon-btn" id="downloadBtn" title="Download as JSON">💾 Save</button>
-                        </div>
-                    </div>
+                    <h4 style="font-size: 14px; font-weight: 700; color: var(--text-dark); margin-bottom: 16px;">📋 AI Analysis Results</h4>
                     <div class="result-content" id="resultContent"></div>
                 </div>
             </div>
@@ -596,7 +562,7 @@
     <!-- Toast Notification -->
     <div class="toast toast-success" id="toast">
         <span>✓</span>
-        <span id="toastMessage">Copied to clipboard!</span>
+        <span id="toastMessage">Operation successful!</span>
     </div>
     
     <script>
@@ -615,8 +581,6 @@
         const loading = document.getElementById('loading');
         const resultContainer = document.getElementById('resultContainer');
         const resultContent = document.getElementById('resultContent');
-        const copyBtn = document.getElementById('copyBtn');
-        const downloadBtn = document.getElementById('downloadBtn');
         const toast = document.getElementById('toast');
         const toastMessage = document.getElementById('toastMessage');
         
@@ -686,36 +650,6 @@
             });
         });
         
-        copyBtn.addEventListener('click', async () => {
-            try {
-                await navigator.clipboard.writeText(resultContent.textContent);
-                showToast('Copied to clipboard!');
-            } catch (err) {
-                showToast('Failed to copy');
-            }
-        });
-        
-        downloadBtn.addEventListener('click', () => {
-            const data = {
-                role: roleSelect.value,
-                analysis: resultContent.textContent,
-                metadata: {
-                    tokens: tokensMetric.textContent,
-                    time: timeMetric.textContent,
-                    words: wordsMetric.textContent,
-                    timestamp: new Date().toISOString()
-                }
-            };
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'ultramind-analysis.json';
-            a.click();
-            URL.revokeObjectURL(url);
-            showToast('Downloaded successfully!');
-        });
-        
         // Form Submit
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -769,7 +703,7 @@
                 loading.classList.remove('show');
                 updateStatus('error', 'Error');
                 resultContent.classList.add('error');
-                resultContent.textContent = `❌ Error: ${error.message}\n\nMake sure the server is running on http://localhost:3000`;
+                resultContent.textContent = `❌ Error: ${error.message}\n\nMake sure the server is running on https://ultramind-api.onrender.com`;
                 resultContainer.classList.add('show');
                 showToast('Analysis failed');
             } finally {
