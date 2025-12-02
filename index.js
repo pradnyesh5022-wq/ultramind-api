@@ -3,9 +3,8 @@ const express = require('express');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const multer = require('multer');
 
-// FIX: make pdfParse a real function in CommonJS
-const pdfParseModule = require('pdf-parse');
-const pdfParse = pdfParseModule.default || pdfParseModule;
+// pdf-parse: simple import for v1.1.1
+const pdfParse = require('pdf-parse');
 
 console.log('RUNNING FILE:', __filename);
 console.log('TYPE OF pdfParse:', typeof pdfParse);
@@ -71,7 +70,7 @@ ${text}`;
   return response.text();
 }
 
-// Existing JSON summarize endpoint
+// JSON summarize endpoint
 app.post('/summarize', async (req, res) => {
   try {
     const { text, role = 'developer' } = req.body;
@@ -102,7 +101,7 @@ app.post('/summarize', async (req, res) => {
   }
 });
 
-// NEW: PDF summarize endpoint
+// PDF summarize endpoint
 app.post('/summarize-pdf', upload.single('file'), async (req, res) => {
   try {
     const role = req.body.role || 'developer';
