@@ -3,9 +3,12 @@ const express = require('express');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const multer = require('multer');
 
-// FIXED: pdf-parse import so pdfParse is a real function
+// FIX: make pdfParse a real function in CommonJS
 const pdfParseModule = require('pdf-parse');
 const pdfParse = pdfParseModule.default || pdfParseModule;
+
+console.log('RUNNING FILE:', __filename);
+console.log('TYPE OF pdfParse:', typeof pdfParse);
 
 const app = express();
 const PORT = 3000;
