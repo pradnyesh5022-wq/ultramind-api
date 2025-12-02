@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UltraMind - AI Document Intelligence Engine</title>
+    <meta name="description" content="Production-ready AI document analyzer with role-based insights">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --bg-light: #f8fafc;
+            --bg-white: #ffffff;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            --radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text-dark);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 450px;
+            gap: 24px;
+            align-items: start;
+        }
+        
+        @media (max-width: 1200px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+            .stats-panel {
+                position: relative !important;
+                top: 0 !important;
+            }
+        }
+        
+        /* Main Card */
+        .card {
+            background: var(--bg-white);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: var(--shadow-xl);
+            backdrop-filter: blur(10px);
+            animation: slideUp 0.5s ease;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        .logo {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .header-text h1 {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+        }
+        
+        .header-text p {
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        /* Form Groups */
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        .form-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-dark);
+            margin-bottom: 10px;
+        }
+        
+        .char-counter {
+            margin-left: auto;
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        
+        .char-counter.warning {
+            color: var(--warning);
+        }
+        
+        textarea, select {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 15px;
+            font-family: inherit;
+            transition: var(--transition);
+            background: var(--bg-light);
+        }
+        
+        textarea {
+            min-height: 200px;
+            resize: vertical;
+        }
+        
+        textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+        
+        /* Button Group */
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        
+        .btn {
+            padding: 16px 28px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.5);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: var(--text-dark);
+            border: 2px solid var(--border);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--bg-light);
+            border-color: var(--primary);
+        }
+        
+        /* Examples */
+        .examples {
+            margin-top: 20px;
+            padding: 16px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.05));
+            border-radius: var(--radius);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        
+        .examples-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+        }
+        
+        .example-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .example-tag {
+            padding: 6px 12px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .example-tag:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+        
+        /* Stats Panel */
+        .stats-panel {
+            position: sticky;
+            top: 20px;
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: var(--shadow-xl);
+        }
+        
+        .stats-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+        
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-idle {
+            background: rgba(100, 116, 139, 0.1);
+            color: var(--text-muted);
+        }
+        
+        .status-analyzing {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            animation: pulse-badge 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-badge {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        
+        .status-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+        
+        .status-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        
+        .metric-box {
+            padding: 16px;
+            background: var(--bg-light);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+        
+        .metric-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+        
+        .metric-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+        
+        /* Result Display */
+        .result-container {
+            margin-top: 24px;
+            display: none;
+        }
+        
+        .result-container.show {
+            display: block;
+            animation: slideUp 0.4s ease;
+        }
+        
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        
+        .result-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .icon-btn {
+            padding: 8px 12px;
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 12px;
+        }
+        
+        .icon-btn:hover {
+            background: white;
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        .result-content {
+            padding: 20px;
+            background: var(--bg-light);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+        
+        .result-content.error {
+            background: rgba(239, 68, 68, 0.05);
+            border-color: rgba(239, 68, 68, 0.2);
+            color: var(--error);
+        }
+        
+        /* Loading Animation */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 16px 24px;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--border);
+            display: none;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            animation: slideInRight 0.3s ease;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .toast.show {
+            display: flex;
+        }
+        
+        .toast-success {
+            border-left: 4px solid var(--success);
+        }
+        
+        /* Utility Classes */
+        .text-muted {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+        
+        .mt-2 {
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Main Input Panel -->
+        <div class="card">
+            <div class="header">
+                <div class="logo">UM</div>
+                <div class="header-text">
+                    <h1>UltraMind</h1>
+                    <p>AI Document Intelligence Engine · Production Ready</p>
+                </div>
+            </div>
+            
+            <form id="analyzeForm">
+                <div class="form-group">
+                    <label class="form-label">
+                        <span>📝 Document Text</span>
+                        <span class="char-counter" id="charCounter">0 characters · 0 tokens</span>
+                    </label>
+                    <textarea 
+                        id="text" 
+                        placeholder="Paste your document, article, resume, or any text here for AI analysis..."
+                        required
+                    ></textarea>
+                    <p class="text-muted mt-2">💡 Tip: Use Ctrl+Enter to submit quickly</p>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <span>👤 Analysis Mode</span>
+                    </label>
+                    <select id="role" required>
+                        <option value="developer">💻 Developer – Technical Insights & Code Patterns</option>
+                        <option value="recruiter">👔 Recruiter – Skills & Experience Analysis</option>
+                        <option value="analyst">📊 Analyst – Patterns, Trends & Data Insights</option>
+                        <option value="student">🎓 Student – Simple Explanation & Learning Points</option>
+                    </select>
+                </div>
+                
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary" id="analyzeBtn">
+                        <span>✨</span>
+                        <span>Analyze with AI</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="clearBtn">
+                        Clear
+                    </button>
+                </div>
+            </form>
+            
+            <div class="examples">
+                <div class="examples-title">📚 Try Example Documents:</div>
+                <div class="example-tags">
+                    <div class="example-tag" data-example="tech">Tech Article</div>
+                    <div class="example-tag" data-example="resume">Resume Sample</div>
+                    <div class="example-tag" data-example="business">Business Report</div>
+                    <div class="example-tag" data-example="code">Code Documentation</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Stats & Results Panel -->
+        <div class="stats-panel">
+            <div class="stats-card">
+                <div class="stats-header">
+                    <h3 style="font-size: 16px; font-weight: 700;">Live Analysis</h3>
+                    <span class="status-badge status-idle" id="statusBadge">Idle</span>
+                </div>
+                
+                <div class="metrics-grid">
+                    <div class="metric-box">
+                        <div class="metric-value" id="tokensMetric">—</div>
+                        <div class="metric-label">Tokens Used</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value" id="timeMetric">—</div>
+                        <div class="metric-label">Response Time</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value" id="wordsMetric">—</div>
+                        <div class="metric-label">Words Analyzed</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value" id="modeMetric">—</div>
+                        <div class="metric-label">Analysis Mode</div>
+                    </div>
+                </div>
+                
+                <div class="loading" id="loading">
+                    <div class="loader"></div>
+                    <div class="loading-text">AI is analyzing your document...</div>
+                </div>
+                
+                <div class="result-container" id="resultContainer">
+                    <div class="result-header">
+                        <h4 style="font-size: 14px; font-weight: 700; color: var(--text-dark);">📋 AI Analysis Results</h4>
+                        <div class="result-actions">
+                            <button class="icon-btn" id="copyBtn" title="Copy to clipboard">📋 Copy</button>
+                            <button class="icon-btn" id="downloadBtn" title="Download as JSON">💾 Save</button>
+                        </div>
+                    </div>
+                    <div class="result-content" id="resultContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div class="toast toast-success" id="toast">
+        <span>✓</span>
+        <span id="toastMessage">Copied to clipboard!</span>
+    </div>
+    
+    <script>
+        // Elements
+        const form = document.getElementById('analyzeForm');
+        const textArea = document.getElementById('text');
+        const roleSelect = document.getElementById('role');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const charCounter = document.getElementById('charCounter');
+        const statusBadge = document.getElementById('statusBadge');
+        const tokensMetric = document.getElementById('tokensMetric');
+        const timeMetric = document.getElementById('timeMetric');
+        const wordsMetric = document.getElementById('wordsMetric');
+        const modeMetric = document.getElementById('modeMetric');
+        const loading = document.getElementById('loading');
+        const resultContainer = document.getElementById('resultContainer');
+        const resultContent = document.getElementById('resultContent');
+        const copyBtn = document.getElementById('copyBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+        
+        // Example texts
+        const examples = {
+            tech: "React is a JavaScript library for building user interfaces. It uses a component-based architecture and virtual DOM for efficient rendering. Developers can create reusable UI components and manage state effectively using hooks like useState and useEffect.",
+            resume: "John Smith has 5 years of experience in full-stack development. Proficient in React, Node.js, Python, and AWS. Led a team of 4 developers, built 3 production applications, and improved system performance by 40%. Strong problem-solving skills and experience with Agile methodologies.",
+            business: "Q4 sales increased by 25% compared to last year. Customer retention improved to 92%, and new client acquisition grew by 18%. Key factors include enhanced product features, improved customer support, and successful marketing campaigns targeting enterprise clients.",
+            code: "This API endpoint accepts POST requests with JSON payload containing text and role parameters. It processes the document using AI models and returns structured insights including key findings, entities, and summaries. Response time typically under 3 seconds."
+        };
+        
+        // Utility Functions
+        function estimateTokens(text) {
+            return Math.ceil(text.trim().split(/\s+/).length * 1.3);
+        }
+        
+        function countWords(text) {
+            return text.trim().split(/\s+/).filter(Boolean).length;
+        }
+        
+        function updateCharCounter() {
+            const text = textArea.value;
+            const chars = text.length;
+            const tokens = estimateTokens(text);
+            charCounter.textContent = `${chars.toLocaleString()} characters · ${tokens.toLocaleString()} tokens`;
+            charCounter.classList.toggle('warning', chars > 5000);
+        }
+        
+        function showToast(message) {
+            toastMessage.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+        
+        function updateStatus(status, text) {
+            statusBadge.className = `status-badge status-${status}`;
+            statusBadge.textContent = text;
+        }
+        
+        // Event Listeners
+        textArea.addEventListener('input', updateCharCounter);
+        
+        textArea.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                form.dispatchEvent(new Event('submit'));
+            }
+        });
+        
+        clearBtn.addEventListener('click', () => {
+            textArea.value = '';
+            updateCharCounter();
+            resultContainer.classList.remove('show');
+            updateStatus('idle', 'Idle');
+            tokensMetric.textContent = '—';
+            timeMetric.textContent = '—';
+            wordsMetric.textContent = '—';
+            modeMetric.textContent = '—';
+        });
+        
+        document.querySelectorAll('.example-tag').forEach(tag => {
+            tag.addEventListener('click', () => {
+                const example = tag.dataset.example;
+                textArea.value = examples[example];
+                updateCharCounter();
+                showToast(`Loaded ${tag.textContent} example`);
+            });
+        });
+        
+        copyBtn.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(resultContent.textContent);
+                showToast('Copied to clipboard!');
+            } catch (err) {
+                showToast('Failed to copy');
+            }
+        });
+        
+        downloadBtn.addEventListener('click', () => {
+            const data = {
+                role: roleSelect.value,
+                analysis: resultContent.textContent,
+                metadata: {
+                    tokens: tokensMetric.textContent,
+                    time: timeMetric.textContent,
+                    words: wordsMetric.textContent,
+                    timestamp: new Date().toISOString()
+                }
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ultramind-analysis.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Downloaded successfully!');
+        });
+        
+        // Form Submit
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const text = textArea.value.trim();
+            if (!text) {
+                textArea.focus();
+                return;
+            }
+            
+            const role = roleSelect.value;
+            const startTime = performance.now();
+            
+            // Update UI
+            updateStatus('analyzing', 'Analyzing...');
+            loading.classList.add('show');
+            resultContainer.classList.remove('show');
+            analyzeBtn.disabled = true;
+            
+            // Update metrics
+            const words = countWords(text);
+            const tokens = estimateTokens(text);
+            wordsMetric.textContent = words.toLocaleString();
+            tokensMetric.textContent = tokens.toLocaleString();
+            modeMetric.textContent = role.charAt(0).toUpperCase() + role.slice(1);
+            
+            try {
+                const response = await fetch('http://localhost:3000/summarize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text, role })
+                });
+                
+                const data = await response.json();
+                const endTime = performance.now();
+                const elapsed = ((endTime - startTime) / 1000).toFixed(2);
+                
+                timeMetric.textContent = `${elapsed}s`;
+                loading.classList.remove('show');
+                
+                if (data.success) {
+                    updateStatus('success', 'Success');
+                    resultContent.classList.remove('error');
+                    resultContent.textContent = data.analysis;
+                    resultContainer.classList.add('show');
+                    showToast('Analysis complete!');
+                } else {
+                    throw new Error(data.error || 'Analysis failed');
+                }
+            } catch (error) {
+                loading.classList.remove('show');
+                updateStatus('error', 'Error');
+                resultContent.classList.add('error');
+                resultContent.textContent = `❌ Error: ${error.message}\n\nMake sure the server is running on http://localhost:3000`;
+                resultContainer.classList.add('show');
+                showToast('Analysis failed');
+            } finally {
+                analyzeBtn.disabled = false;
+            }
+        });
+        
+        // Initialize
+        updateCharCounter();
+    </script>
+</body>
+</html>
