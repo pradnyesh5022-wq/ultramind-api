@@ -2,7 +2,10 @@
 const express = require('express');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const multer = require('multer');
-const pdfParse = require('pdf-parse');
+
+// FIXED: pdf-parse import so pdfParse is a real function
+const pdfParseModule = require('pdf-parse');
+const pdfParse = pdfParseModule.default || pdfParseModule;
 
 const app = express();
 const PORT = 3000;
@@ -75,8 +78,8 @@ app.post('/summarize', async (req, res) => {
     }
 
     console.log(`📝 Processing /summarize request for role: ${role}`);
-
     console.log('🤖 Calling Gemini API...');
+
     const summary = await runGeminiAnalysis(text, role);
 
     console.log('✅ Success!');
@@ -102,7 +105,9 @@ app.post('/summarize-pdf', upload.single('file'), async (req, res) => {
     const role = req.body.role || 'developer';
 
     if (!req.file) {
-      return res.status(400).json({ error: 'PDF file is required (field name: file)' });
+      return res.status(400).json({
+        error: 'PDF file is required (field name: file)'
+      });
     }
 
     console.log(`📄 Received PDF for /summarize-pdf (role: ${role})`);
@@ -113,7 +118,8 @@ app.post('/summarize-pdf', upload.single('file'), async (req, res) => {
 
     if (!text) {
       return res.status(400).json({
-        error: 'Could not extract text from PDF. Check that the file is a readable text PDF.'
+        error:
+          'Could not extract text from PDF. Check that the file is a readable text PDF.'
       });
     }
 
@@ -141,7 +147,9 @@ app.post('/summarize-pdf', upload.single('file'), async (req, res) => {
 
 // Health/root
 app.get('/', (req, res) => {
-  res.send('🚀 UltraMind API is Running! POST to /summarize with {text, role} or POST PDF to /summarize-pdf');
+  res.send(
+    '🚀 UltraMind API is Running! POST to /summarize with {text, role} or POST PDF to /summarize-pdf'
+  );
 });
 
 app.listen(PORT, () => {
